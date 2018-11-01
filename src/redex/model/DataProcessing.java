@@ -188,6 +188,15 @@ public class DataProcessing {
         }
     }
     
+    public void printPackList(){
+        for(int i=0; i<listPack.size(); i++){
+            System.out.println(String.valueOf(listPack.get(i).getOriginAirport()) + "->" +
+                    String.valueOf(listPack.get(i).getDestinyAirport()) + " " +
+                    String.valueOf(listPack.get(i).getOriginHour()) + ":" +
+                    String.valueOf(listPack.get(i).getOriginMin()));
+        }
+    }
+    
     public int getTrackTime(Flight evalFlight){
         int timeOrigin = evalFlight.getOriginHour()*60 + evalFlight.getOriginMin();
         int timeDestiny = evalFlight.getDestinyHour()*60 + evalFlight.getDestinyMin();

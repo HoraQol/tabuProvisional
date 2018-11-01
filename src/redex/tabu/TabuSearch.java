@@ -17,7 +17,7 @@ public class TabuSearch {
     private int numAirport;
     private int numFlight;
     // NEW!
-    private int numInt = 10;
+    private int numInt = 1000;
     // END NEW!
     private int originId;
     private int destinyId;
@@ -46,6 +46,27 @@ public class TabuSearch {
                 (inputProcess.searchAirportId(codeDestiny) != -1));
     }
     
+    public void executeVCRPTabu(){
+        for(int iter=0; iter<listPack.size(); iter++){
+            String origin = listAirport.get(listPack.get(iter).getOriginAirport()-1).getIcaoCode();
+            String destiny = listAirport.get(listPack.get(iter).getDestinyAirport()-1).getIcaoCode();
+            if(validator(origin, destiny)){
+                String time = String.valueOf(listPack.get(iter).getOriginHour()) + ":" + 
+                        String.valueOf(listPack.get(iter).getOriginMin());
+                tabuAlgorithm(origin, destiny, time);
+                ArrayList<Integer> solution = getRouteOptimal();
+                for(int i : solution){
+                    System.out.print(i + "->");
+                }
+                System.out.println();
+                int lenghtOptimal = getLenghtOptimal();
+                System.out.println("Optimal route's lenght is: " + String.valueOf(lenghtOptimal));
+            }else{
+                System.out.println("Some airport doesn't exist!");
+            }
+        }
+    }
+    
     public void tabuAlgorithm(String codeOrigin, String codeDestiny, String hourBegin){
         this.originId = inputProcess.searchAirportId(codeOrigin);
         this.destinyId = inputProcess.searchAirportId(codeDestiny);
@@ -57,10 +78,10 @@ public class TabuSearch {
         } else this.limit = 2880;
         this.hourBegin = inputProcess.getFormatHour(Integer.valueOf(hourBegin.split(":")[0]),
                 Integer.valueOf(hourBegin.split(":")[1]));
-        long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
         int[] solution = solve();
-        long elapsedTime = System.currentTimeMillis() - start;
-        System.out.println("Tiempo: " + String.valueOf(elapsedTime) + " mseg");
+        //long elapsedTime = System.currentTimeMillis() - start;
+        //System.out.println("Tiempo: " + String.valueOf(elapsedTime) + " mseg");
         for(int i : solution){
             if(i == -1) break;
             routeOptimal.add(Integer.valueOf(i));
@@ -118,15 +139,6 @@ public class TabuSearch {
         return bestRoute;
     }
 
-//    private int[] generateInitialSolution(){
-//        int[] solution = new int[numAirport];
-//        solution[0] = originId-1;
-//        for(int i=1; i<numAirport; i++){
-//            solution[i] = -1;
-//        }
-//        return solution;
-//    }
-
     private int[] generateInitialRoute(){
         int[] solution = new int[numAirport-1];
         for(int i=0; i<(numAirport-1);i++){
@@ -145,8 +157,10 @@ public class TabuSearch {
             ArrayList<String> tabuString, int[] route){
         int[] bestRoute = route.clone();
         for(int i=0; i<numLoop; i++){
-            bestRoute = localSearch(tabuString, bestRoute);
-            if(bestRoute[0] == -1);
+            int[] auxBestRoute = localSearch(tabuString, bestRoute);
+            System.out.println(getRouteLenght(auxBestRoute));
+            if(auxBestRoute[0] == -1) break;
+            else bestRoute = auxBestRoute.clone();
         }
         return bestRoute;
     }
@@ -270,7 +284,8 @@ public class TabuSearch {
             
 //            System.out.println("Resultado: " + String.valueOf(neighborRoute.equals(generateInitialRoute())));
             // Get fitness of local
-            if(neighborRoute.equals(generateInitialRoute()) == false){
+            System.out.println(neighborRoute[0] != -1);
+            if(neighborRoute[0] != -1){
                 ArrayList<Integer> nSolution = new ArrayList<Integer>();
                 for(int iter : neighborRoute){
                     if(iter == -1) break;
@@ -289,6 +304,10 @@ public class TabuSearch {
                     bestRoute = neighborRoute.clone();
                     bestFitness=costoActual;
                 }
+            }else{
+                int[] voider = new int[1];
+                voider[0] = -1;
+                return voider;
             }
         }catch(Exception e){
             System.out.println("Error " + e.getMessage());
@@ -409,5 +428,9 @@ public class TabuSearch {
     
     public void printListFlight(){
         inputProcess.printListFlight();
+    }
+    
+    public void printPackList(){
+        inputProcess.printPackList();
     }
 }
